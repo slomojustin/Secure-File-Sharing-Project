@@ -1,7 +1,8 @@
 # Secure End-to-End Encrypted File Storage System
 
 A cryptographically secure file storage system built in Go with end-to-end encryption, integrity verification, and secure file sharing. All cryptographic operations occur client-side against an untrusted server, ensuring complete data confidentiality.
-<img width="1536" height="1024" alt="file_sharing" src="https://github.com/user-attachments/assets/20fe53d8-8058-420f-bacc-966759564d1c" />
+
+<img width="750" height="750" alt="file_sharing" src="https://github.com/user-attachments/assets/20fe53d8-8058-420f-bacc-966759564d1c" />
 
 
 ## Features
