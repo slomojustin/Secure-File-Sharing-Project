@@ -41,3 +41,98 @@ Encrypted data, HMAC, pointer to next block
 
 ### Cryptographic Design
 
+#### Storage Format
+- **User**: `[Salt || HMAC || Encrypted UserMetadata]`
+- **File Metadata**: `[HMAC || Encrypted FileMetadata]`
+- **Invitation**: `[Encrypted Symmetric Key || Encrypted AccessNode]`
+
+## API
+
+### User Operations
+
+#### `InitUser(username, password)`
+Creates account with key generation
+
+#### `GetUser(username, password)`
+Authenticates and loads user session
+
+### File Operations
+
+#### `StoreFile(filename, content)`
+Encrypts and stores/overwrites file
+
+#### `LoadFile(filename)`
+Retrieves and decrypts file with integrity verification
+
+#### `AppendToFile(filename, content)`
+Appends data without rewriting existing blocks
+
+### Sharing Operations
+
+#### `CreateInvitation(filename, recipientUsername)`
+Generates encrypted invitation
+
+#### `AcceptInvitation(senderUsername, invitationPtr, filename)`
+Accepts shared file
+
+#### `RevokeAccess(filename, recipientUsername)`
+Revokes all sharing by key rotation
+
+## Security Properties
+
+### Confidentiality
+- AES-CTR encryption with random IVs
+- Separate encryption for content and metadata
+- Hybrid encryption for invitations
+
+### Integrity
+- HMAC-SHA512 on all encrypted data
+- Per-block verification
+- Tampering detection before decryption
+
+### Access Control
+- Owner-only revocation
+- Single-use invitations
+- Cryptographic revocation via key rotation
+
+## Implementation Highlights
+
+### Efficient Appends
+Linked-list structure with `LastBlockLoc` tracking enables O(1) appends without traversing the file.
+
+### Filename Privacy
+Filenames are hashed before storage to prevent enumeration attacks.
+
+### Revocation Strategy
+Deletes invitation UUIDs, rotates to new metadata UUID and encryption keys, invalidating all existing shares atomically.
+
+### Deterministic UUIDs
+User UUIDs derived from username hashes enable consistent lookup without additional mappings.
+
+## Dependencies
+
+- `github.com/cs161-staff/project2-userlib` - Cryptographic primitives
+- `github.com/google/uuid` - UUID generation
+- `encoding/json` - Serialization
+- `encoding/hex` - Encoding utilities
+
+## Error Handling
+
+Comprehensive error checking for:
+- Authentication failures
+- HMAC verification failures (tampering detected)
+- Missing files or corrupted metadata
+- Permission violations
+- Invalid invitations
+
+## Limitations
+
+- No key rotation for user root keys
+- Flat namespace (no directories)
+- Single ownership (no transfer)
+- Revocation affects all users (no selective revocation)
+
+---
+
+This implementation provides production-grade client-side encryption with strong security guarantees for file storage and sharing scenarios.
+
